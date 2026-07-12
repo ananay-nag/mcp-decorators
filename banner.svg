@@ -1,0 +1,111 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 280" width="800" height="280">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#050b14" />
+      <stop offset="100%" stop-color="#0c192c" />
+    </linearGradient>
+
+    <!-- Glowing Accent Gradient -->
+    <radialGradient id="glowGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#db2777" stop-opacity="0.15" />
+      <stop offset="100%" stop-color="#db2777" stop-opacity="0" />
+    </radialGradient>
+
+    <!-- Dark Blue Gradient for Hexagon Frame -->
+    <linearGradient id="darkBlueGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f2942" />
+      <stop offset="100%" stop-color="#1e3a8a" />
+    </linearGradient>
+    
+    <!-- Pink Gradient for Logo loops -->
+    <linearGradient id="pinkGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f472b6" /> <!-- Pink-400 -->
+      <stop offset="50%" stop-color="#db2777" /> <!-- Pink-600 -->
+      <stop offset="100%" stop-color="#9d174d" /> <!-- Pink-800 -->
+    </linearGradient>
+
+    <!-- Text Purple-to-Pink Gradient -->
+    <linearGradient id="textGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#a78bfa" /> <!-- Violet-400 -->
+      <stop offset="100%" stop-color="#f472b6" /> <!-- Pink-400 -->
+    </linearGradient>
+  </defs>
+
+  <!-- Background Layer -->
+  <rect width="800" height="280" fill="url(#bgGrad)" />
+
+  <!-- Subtle Grid Lines -->
+  <g stroke="#1e293b" stroke-width="0.5" opacity="0.3">
+    <path d="M 0,40 H 800 M 0,80 H 800 M 0,120 H 800 M 0,160 H 800 M 0,200 H 800 M 0,240 H 800" />
+    <path d="M 80,0 V 280 M 160,0 V 280 M 240,0 V 280 M 320,0 V 280 M 400,0 V 280 M 480,0 V 280 M 560,0 V 280 M 640,0 V 280 M 720,0 V 280" />
+  </g>
+
+  <!-- Background Glow behind the Logo -->
+  <circle cx="160" cy="140" r="120" fill="url(#glowGrad)" />
+
+  <!-- Logo Group (mcp-hex-pink.svg) scaled and centered on the left -->
+  <g transform="translate(60, 40) scale(2)">
+    <!-- Hexagon Frame -->
+    <path d="M 50,12 
+             L 83,31 
+             L 83,69 
+             L 50,88 
+             L 17,69 
+             L 17,31 Z" 
+          fill="none" 
+          stroke="url(#darkBlueGrad)" 
+          stroke-width="4.5" 
+          stroke-linecap="round" 
+          stroke-linejoin="round" />
+
+    <!-- Nested Official Loop Shape -->
+    <g transform="translate(50, 50) scale(0.72) translate(-50, -50)">
+      <g transform="rotate(-45, 50, 50)">
+        <path d="M 28 25 
+                 H 64 
+                 A 8 8 0 0 1 64 41 
+                 H 36 
+                 A 8 8 0 0 0 36 57 
+                 H 72 
+                 A 8 8 0 0 1 72 73 
+                 H 44" 
+              fill="none" 
+              stroke="url(#pinkGrad)" 
+              stroke-width="7.5" 
+              stroke-linecap="round" 
+              stroke-linejoin="round" />
+      </g>
+    </g>
+  </g>
+
+  <!-- Title & Branding Text (Left-aligned next to logo) -->
+  <text x="280" y="115" font-family="Inter, system-ui, sans-serif" font-weight="900" font-size="38" letter-spacing="-1.5" fill="url(#textGrad)">MCP Decorators</text>
+  
+  <text x="280" y="150" font-family="Inter, system-ui, sans-serif" font-weight="500" font-size="16" letter-spacing="-0.5" fill="#94a3b8">
+    Declarative Model Context Protocol for TypeScript
+  </text>
+  
+  <text x="280" y="175" font-family="Inter, system-ui, sans-serif" font-weight="400" font-size="14" fill="#64748b">
+    Write cleaner, modular, and metadata-driven MCP servers and clients.
+  </text>
+
+  <!-- Bullet Feature Pill Badges -->
+  <g transform="translate(280, 205)">
+    <!-- Badge 1: @mcp -->
+    <rect x="0" y="0" width="60" height="24" rx="12" fill="#1e1b4b" stroke="#312e81" stroke-width="1" />
+    <text x="30" y="16" font-family="JetBrains Mono, Courier New, monospace" font-weight="700" font-size="11" fill="#c084fc" text-anchor="middle">@mcp</text>
+
+    <!-- Badge 2: @tool -->
+    <rect x="70" y="0" width="65" height="24" rx="12" fill="#1e1b4b" stroke="#312e81" stroke-width="1" />
+    <text x="102.5" y="16" font-family="JetBrains Mono, Courier New, monospace" font-weight="700" font-size="11" fill="#c084fc" text-anchor="middle">@tool</text>
+
+    <!-- Badge 3: @prompt -->
+    <rect x="145" y="0" width="75" height="24" rx="12" fill="#1e1b4b" stroke="#312e81" stroke-width="1" />
+    <text x="182.5" y="16" font-family="JetBrains Mono, Courier New, monospace" font-weight="700" font-size="11" fill="#c084fc" text-anchor="middle">@prompt</text>
+
+    <!-- Badge 4: @resource -->
+    <rect x="230" y="0" width="95" height="24" rx="12" fill="#1e1b4b" stroke="#312e81" stroke-width="1" />
+    <text x="277.5" y="16" font-family="JetBrains Mono, Courier New, monospace" font-weight="700" font-size="11" fill="#c084fc" text-anchor="middle">@resource</text>
+  </g>
+</svg>
