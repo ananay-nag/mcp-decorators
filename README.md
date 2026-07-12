@@ -99,7 +99,7 @@ export class MyMCPServer extends Server {
 ```typescript
 import { UseServer } from "@ananay-nag/mcp-decorators";
 
-@UseServer({ name: "my-mcp-server", version: "2.0.0" })
+@UseServer({ name: "my-mcp-server", version: "2.0.1" })
 export class DbHandlers {
   server: any; // Injected server instance
 }
@@ -283,7 +283,7 @@ export class MyMCPServer extends Server {
 import { UseServer, Tool, Resource, ResourceTemplate } from "@ananay-nag/mcp-decorators";
 import { z } from "zod";
 
-@UseServer({ name: "my-database-mcp", version: "2.0.0" })
+@UseServer({ name: "my-database-mcp", version: "2.0.1" })
 export class DbHandlers {
   server: any; // Injected instance
 
@@ -332,7 +332,7 @@ import { DbHandlers } from "./dbHandlers.js";
 async function main() {
   // 1. Create registered server instance
   const server = new MyMCPServer(
-    { name: "my-database-mcp", version: "2.0.0" },
+    { name: "my-database-mcp", version: "2.0.1" },
     { capabilities: {} }
   );
 
@@ -447,7 +447,7 @@ export class MyMCPClient extends Client {}
 ```typescript
 import { UseClient, CallTool, ListTools, ReadResource, NotificationHandler } from "@ananay-nag/mcp-decorators";
 
-@UseClient({ name: "my-mcp-client", version: "2.0.0" })
+@UseClient({ name: "my-mcp-client", version: "2.0.1" })
 export class ClientController {
   client: any; // Injected instance
 
@@ -481,7 +481,7 @@ import { ClientController } from "./service.js";
 
 async function runClient() {
   const client = new MyMCPClient(
-    { name: "my-mcp-client", version: "2.0.0" },
+    { name: "my-mcp-client", version: "2.0.1" },
     { capabilities: {} }
   );
 
@@ -561,7 +561,7 @@ Fetch a registered server instance programmatically.
 ```typescript
 import { getServer } from "@ananay-nag/mcp-decorators";
 
-const server = getServer({ name: "my-database-mcp", version: "2.0.0" });
+const server = getServer({ name: "my-database-mcp", version: "2.0.1" });
 ```
 
 #### 6. `getClient(options)`
@@ -569,7 +569,7 @@ Fetch a registered client instance programmatically.
 ```typescript
 import { getClient } from "@ananay-nag/mcp-decorators";
 
-const client = getClient({ name: "my-mcp-client", version: "2.0.0" });
+const client = getClient({ name: "my-mcp-client", version: "2.0.1" });
 ```
 
 ---
