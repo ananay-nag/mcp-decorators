@@ -2,6 +2,27 @@
 
 ![MCP Decorators Banner](banner.svg)
 
+<p align="center">
+  <a href="https://www.npmjs.com/package/@ananay-nag/mcp-decorators">
+    <img src="https://img.shields.io/npm/v/@ananay-nag/mcp-decorators.svg?color=cb3837&style=flat-square" alt="npm version" />
+  </a>
+  <a href="https://www.npmjs.com/package/@ananay-nag/mcp-decorators">
+    <img src="https://img.shields.io/node/v/@ananay-nag/mcp-decorators.svg?color=339933&style=flat-square" alt="node compatibility" />
+  </a>
+  <a href="https://github.com/ananay-nag/mcp-decorators/actions/workflows/test.yml">
+    <img src="https://img.shields.io/github/actions/workflow/status/ananay-nag/mcp-decorators/test.yml.svg?style=flat-square" alt="build status" />
+  </a>
+  <a href="https://github.com/ananay-nag/mcp-decorators/issues">
+    <img src="https://img.shields.io/github/issues/ananay-nag/mcp-decorators.svg?color=2ea44f&style=flat-square" alt="github issues" />
+  </a>
+  <a href="https://github.com/ananay-nag/mcp-decorators/blob/main/LICENSE">
+    <img src="https://img.shields.io/github/license/ananay-nag/mcp-decorators.svg?color=6f42c1&style=flat-square" alt="license" />
+  </a>
+  <a href="https://mcp-decorators-doc.vercel.app/">
+    <img src="https://img.shields.io/badge/Documentation-mcp--decorators-0969da.svg?style=flat-square" alt="Documentation" />
+  </a>
+</p>
+
 A powerful, TypeScript-native decorator library to simplify and supercharge your Model Context Protocol (MCP) server and client development.
 
 `@ananay-nag/mcp-decorators` enables clean, declarative class-based structures, completely removing repetitive boilerplate for request handling, client calls, resource serving, notifications, autocompletions, and capabilities registration.
@@ -23,7 +44,8 @@ A powerful, TypeScript-native decorator library to simplify and supercharge your
    - [Client Request/Notification Handlers](#client-requestnotification-handlers)
 5. [Full Client Example](#full-client-example)
 6. [Utilities](#utilities)
-7. [Under the Hood & Advantages](#under-the-hood--advantages)
+7. [Testing](#testing)
+8. [Under the Hood & Advantages](#under-the-hood--advantages)
 
 ---
 
@@ -77,7 +99,7 @@ export class MyMCPServer extends Server {
 ```typescript
 import { UseServer } from "@ananay-nag/mcp-decorators";
 
-@UseServer({ name: "my-mcp-server", version: "1.0.0" })
+@UseServer({ name: "my-mcp-server", version: "2.0.0" })
 export class DbHandlers {
   server: any; // Injected server instance
 }
@@ -261,7 +283,7 @@ export class MyMCPServer extends Server {
 import { UseServer, Tool, Resource, ResourceTemplate } from "@ananay-nag/mcp-decorators";
 import { z } from "zod";
 
-@UseServer({ name: "my-database-mcp", version: "1.0.0" })
+@UseServer({ name: "my-database-mcp", version: "2.0.0" })
 export class DbHandlers {
   server: any; // Injected instance
 
@@ -310,7 +332,7 @@ import { DbHandlers } from "./dbHandlers.js";
 async function main() {
   // 1. Create registered server instance
   const server = new MyMCPServer(
-    { name: "my-database-mcp", version: "1.0.0" },
+    { name: "my-database-mcp", version: "2.0.0" },
     { capabilities: {} }
   );
 
@@ -425,7 +447,7 @@ export class MyMCPClient extends Client {}
 ```typescript
 import { UseClient, CallTool, ListTools, ReadResource, NotificationHandler } from "@ananay-nag/mcp-decorators";
 
-@UseClient({ name: "my-mcp-client", version: "1.0.0" })
+@UseClient({ name: "my-mcp-client", version: "2.0.0" })
 export class ClientController {
   client: any; // Injected instance
 
@@ -459,7 +481,7 @@ import { ClientController } from "./service.js";
 
 async function runClient() {
   const client = new MyMCPClient(
-    { name: "my-mcp-client", version: "1.0.0" },
+    { name: "my-mcp-client", version: "2.0.0" },
     { capabilities: {} }
   );
 
@@ -539,7 +561,7 @@ Fetch a registered server instance programmatically.
 ```typescript
 import { getServer } from "@ananay-nag/mcp-decorators";
 
-const server = getServer({ name: "my-database-mcp", version: "1.0.0" });
+const server = getServer({ name: "my-database-mcp", version: "2.0.0" });
 ```
 
 #### 6. `getClient(options)`
@@ -547,8 +569,55 @@ Fetch a registered client instance programmatically.
 ```typescript
 import { getClient } from "@ananay-nag/mcp-decorators";
 
-const client = getClient({ name: "my-mcp-client", version: "1.0.0" });
+const client = getClient({ name: "my-mcp-client", version: "2.0.0" });
 ```
+
+---
+
+## Testing
+
+This library uses **Jest** and **ts-jest** for clean, isolated decorator verification.
+
+### Running the Test Suite
+
+```bash
+# Run all test cases
+npm run test
+
+# Run tests with coverage reporting (excludes uncovered line numbers column)
+npm run test:coverage
+```
+
+### Test Coverage Summary
+
+<details>
+<summary>📊 Click to view full coverage report</summary>
+
+<!-- START_COVERAGE -->
+| File | % Stmts | % Branch | % Funcs | % Lines |
+| :--- | :--- | :--- | :--- | :--- |
+| All files | 70.12 | 52.12 | 61.36 | 70.47 |
+| client/decorators | 77.08 | 52.17 | 68 | 77.65 |
+| client.decorator.ts | 74.71 | 52.38 | 61.9 | 75.29 |
+| notification.decorator.ts | 100 | 50 | 100 | 100 |
+| requestHandler.decorator.ts | 100 | 50 | 100 | 100 |
+| client/utils | 70 | 62.5 | 75 | 68.42 |
+| clientRegistry.ts | 70 | 62.5 | 75 | 68.42 |
+| server/decorators | 72.8 | 53.15 | 62.5 | 73.25 |
+| action.decorator.ts | 100 | 100 | 100 | 100 |
+| completion.decorator.ts | 100 | 50 | 100 | 100 |
+| notification.decorator.ts | 100 | 50 | 100 | 100 |
+| prompt.decorator.ts | 100 | 50 | 100 | 100 |
+| requestHandler.decorator.ts | 100 | 100 | 100 | 100 |
+| resource.decorator.ts | 100 | 50 | 100 | 100 |
+| server.decorator.ts | 66.99 | 52.29 | 35.71 | 67.33 |
+| subscribe.decorator.ts | 100 | 100 | 100 | 100 |
+| tool.decorator.ts | 100 | 50 | 100 | 100 |
+| server/utils | 42.85 | 40 | 36.36 | 42.55 |
+| serverRegistry.ts | 42.85 | 40 | 36.36 | 42.55 |
+<!-- END_COVERAGE -->
+
+</details>
 
 ---
 

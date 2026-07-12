@@ -55,9 +55,6 @@ export function registerRequestHandlers(target: any, instance: any, server: any)
   const pendingHandlers = target.prototype._pendingHandlers || [];
   const actionsMap = target.prototype._actionsMap || {};
 
-  console.error("[Server Debug] pendingHandlers:", pendingHandlers);
-  console.error("[Server Debug] actionsMap:", actionsMap);
-
   const methodGroups = new Map<string, {
     schema: any;
     handlers: Record<string, Function>;
