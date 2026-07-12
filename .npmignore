@@ -7,3 +7,4 @@ tsconfig.json
 package-lock.json
 index.ts
 documentation.md
+coverage
