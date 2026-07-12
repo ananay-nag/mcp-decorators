@@ -41,5 +41,10 @@
   },
   "devDependencies": {
     "@types/node": "^24.0.4"
+  },
+  "homepage": "https://mcp-decorators-doc.vercel.app/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ananay-nag/mcp-decorators.git"
   }
 }
