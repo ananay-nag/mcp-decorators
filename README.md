@@ -6,6 +6,8 @@ A powerful, TypeScript-native decorator library to simplify and supercharge your
 
 `@ananay-nag/mcp-decorators` enables clean, declarative class-based structures, completely removing repetitive boilerplate for request handling, client calls, resource serving, notifications, autocompletions, and capabilities registration.
 
+### [MCP Decorators - Documentation](https://mcp-decorators-doc.vercel.app/)
+
 ---
 
 ## Table of Contents
