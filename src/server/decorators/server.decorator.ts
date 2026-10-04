@@ -353,11 +353,17 @@ function bindAggregatedDispatchers(server: any, reg: any) {
   // --- Prompts Dispatchers ---
   if (reg.prompts.size > 0) {
     server.setRequestHandler(ListPromptsRequestSchema, async () => {
-      const prompts = Array.from(reg.prompts.values()).map((p: any) => ({
-        name: p.options.name,
-        description: p.options.description,
-        arguments: p.options.arguments
-      }));
+      const prompts = Array.from(reg.prompts.values()).map((p: any) => {
+        let args = p.options.arguments;
+        if (!args && p.options.argsSchema) {
+          args = translateArgsSchemaToArguments(p.options.argsSchema);
+        }
+        return {
+          name: p.options.name,
+          description: p.options.description,
+          arguments: args
+        };
+      });
       return { prompts };
     });
 
@@ -466,3 +472,29 @@ function bindAggregatedDispatchers(server: any, reg: any) {
     });
   }
 }
+
+/**
+ * Translates a Zod schema or raw shape into a PromptArgument array for legacy Server fallback.
+ */
+export function translateArgsSchemaToArguments(schemaOrShape: any): Array<{ name: string; description?: string; required?: boolean }> {
+  if (!schemaOrShape) return [];
+  const shape =
+    schemaOrShape.shape ||
+    (schemaOrShape._def && typeof schemaOrShape._def.shape === "function"
+      ? schemaOrShape._def.shape()
+      : schemaOrShape._def?.shape) ||
+    schemaOrShape;
+
+  if (!shape || typeof shape !== "object") return [];
+
+  return Object.entries(shape).map(([key, field]: [string, any]) => {
+    const description = field?.description || field?._def?.description;
+    const isOptional = typeof field?.isOptional === "function" ? field.isOptional() : false;
+    return {
+      name: key,
+      description,
+      required: !isOptional,
+    };
+  });
+}
+

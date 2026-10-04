@@ -31,7 +31,7 @@ This file provides system context, engineering guidelines, and behavioral direct
 
 ### 2.2. Supported Transports
 - **Stdio**: `StdioServerTransport` (`@modelcontextprotocol/sdk/server/stdio.js`) for local CLIs and sub-processes.
-- **Streamable HTTP**: `StreamableHttpServerTransport` (`@modelcontextprotocol/sdk/server/streamableHttp.js`) for modern remote HTTP servers. (Note: legacy SSE transport is deprecated in the MCP specification).
+- **Streamable HTTP**: `StreamableHTTPServerTransport` (`@modelcontextprotocol/sdk/server/streamableHttp.js`) for modern remote HTTP servers. (Note: legacy SSE transport is deprecated in the MCP specification).
 
 ### 2.3. Schema Validation
 - All schemas use `zod` (`^4.5.4`).

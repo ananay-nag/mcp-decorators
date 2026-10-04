@@ -353,8 +353,10 @@ main().catch(console.error);
 ```
 
 ### Streamable HTTP Transport Alternative (Recommended for Remote Servers)
+For remote servers and web APIs, use `StreamableHTTPServerTransport` with Express. In stateless mode, each incoming request is handled independently with its own transport lifecycle:
+
 ```typescript
-import { StreamableHttpServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
+import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import express from "express";
 import { MyMCPServer } from "./server.js";
 import { DbHandlers } from "./dbHandlers.js";
@@ -362,15 +364,24 @@ import { DbHandlers } from "./dbHandlers.js";
 const app = express();
 app.use(express.json());
 
-const server = new MyMCPServer({ name: "my-database-mcp", version: "2.0.2" });
-new DbHandlers();
+// Stateless HTTP setup: independent transport per request, compatible with Express 4 and 5
+app.post("/mcp", async (req, res) => {
+  const server = new MyMCPServer({ name: "my-database-mcp", version: "2.0.2" });
+  new DbHandlers();
 
-const transport = new StreamableHttpServerTransport({
-  endpoint: "/mcp"
+  const transport = new StreamableHTTPServerTransport({
+    sessionIdGenerator: undefined
+  });
+
+  await server.connect(transport);
+  await transport.handleRequest(req, res, req.body);
+
+  res.on("close", () => {
+    transport.close();
+    server.close();
+  });
 });
-await server.connect(transport);
 
-app.all("/mcp*", (req, res) => transport.handleRequest(req, res));
 app.listen(3000, () => console.log("🚀 MCP Server running on Streamable HTTP port 3000"));
 ```
 
@@ -621,21 +632,21 @@ npm run test:coverage
 <!-- START_COVERAGE -->
 | File | % Stmts | % Branch | % Funcs | % Lines |
 | :--- | :--- | :--- | :--- | :--- |
-| All files | 70.35 | 51.98 | 61.36 | 70.87 |
+| All files | 71.39 | 52.47 | 64.44 | 72.1 |
 | client/decorators | 77.08 | 52.17 | 68 | 77.65 |
 | client.decorator.ts | 74.71 | 52.38 | 61.9 | 75.29 |
 | notification.decorator.ts | 100 | 50 | 100 | 100 |
 | requestHandler.decorator.ts | 100 | 50 | 100 | 100 |
 | client/utils | 70 | 62.5 | 75 | 68.42 |
 | clientRegistry.ts | 70 | 62.5 | 75 | 68.42 |
-| server/decorators | 73.07 | 52.85 | 62.5 | 73.8 |
+| server/decorators | 74.63 | 53.38 | 68 | 75.66 |
 | action.decorator.ts | 100 | 100 | 100 | 100 |
 | completion.decorator.ts | 100 | 50 | 100 | 100 |
 | notification.decorator.ts | 100 | 50 | 100 | 100 |
 | prompt.decorator.ts | 100 | 50 | 100 | 100 |
 | requestHandler.decorator.ts | 100 | 100 | 100 | 100 |
 | resource.decorator.ts | 100 | 50 | 100 | 100 |
-| server.decorator.ts | 67.59 | 52.06 | 35.71 | 68.26 |
+| server.decorator.ts | 69.73 | 52.76 | 46.66 | 70.77 |
 | subscribe.decorator.ts | 100 | 100 | 100 | 100 |
 | tool.decorator.ts | 100 | 50 | 100 | 100 |
 | server/utils | 42.85 | 40 | 36.36 | 42.55 |
