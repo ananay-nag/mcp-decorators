@@ -76,17 +76,23 @@ Server-side decorators automate capability aggregation, map request dispatchers,
 
 ### Core Class Decorators
 
+> [!WARNING]
+> **Deprecation Notice for `Server`**:
+> In `@modelcontextprotocol/sdk` v1.32.0+, the low-level `Server` class from `@modelcontextprotocol/sdk/server/index.js` is deprecated in favor of `McpServer` (`@modelcontextprotocol/sdk/server/mcp.js`).
+> `@ananay-nag/mcp-decorators` now provides native first-class integration with `McpServer`.
+> Legacy `Server` continues to work with a runtime deprecation warning in v2.1.x, but support for `Server` will be **completely removed in the next major version**. Please migrate your servers to `McpServer`.
+
 #### 1. `@RegisterServer()`
-* **Target**: Class extending `Server` (from `@modelcontextprotocol/sdk/server/index.js`)
+* **Target**: Class extending `McpServer` (from `@modelcontextprotocol/sdk/server/mcp.js`)
 * **Description**: Automatically registers the instantiated server in the global registry using the name and version passed to the class constructor.
 ```typescript
-import { Server, ServerOptions } from "@modelcontextprotocol/sdk/server/index.js";
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { RegisterServer } from "@ananay-nag/mcp-decorators";
 import { Implementation } from "@modelcontextprotocol/sdk/types.js";
 
 @RegisterServer()
-export class MyMCPServer extends Server {
-  constructor(serverInfo: Implementation, options?: ServerOptions) {
+export class MyMCPServer extends McpServer {
+  constructor(serverInfo: Implementation, options?: any) {
     super(serverInfo, options);
   }
 }
@@ -99,7 +105,7 @@ export class MyMCPServer extends Server {
 ```typescript
 import { UseServer } from "@ananay-nag/mcp-decorators";
 
-@UseServer({ name: "my-mcp-server", version: "2.0.1" })
+@UseServer({ name: "my-mcp-server", version: "2.0.2" })
 export class DbHandlers {
   server: any; // Injected server instance
 }
@@ -266,13 +272,13 @@ export class RawHandlers {
 
 ### `server.ts`
 ```typescript
-import { Server, ServerOptions } from "@modelcontextprotocol/sdk/server/index.js";
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { RegisterServer } from "@ananay-nag/mcp-decorators";
 import { Implementation } from "@modelcontextprotocol/sdk/types.js";
 
 @RegisterServer()
-export class MyMCPServer extends Server {
-  constructor(serverInfo: Implementation, options?: ServerOptions) {
+export class MyMCPServer extends McpServer {
+  constructor(serverInfo: Implementation, options?: any) {
     super(serverInfo, options);
   }
 }
@@ -283,7 +289,7 @@ export class MyMCPServer extends Server {
 import { UseServer, Tool, Resource, ResourceTemplate } from "@ananay-nag/mcp-decorators";
 import { z } from "zod";
 
-@UseServer({ name: "my-database-mcp", version: "2.0.1" })
+@UseServer({ name: "my-database-mcp", version: "2.0.2" })
 export class DbHandlers {
   server: any; // Injected instance
 
@@ -323,18 +329,15 @@ export class DbHandlers {
 }
 ```
 
-### `index.ts`
+### `index.ts` (Stdio Transport)
 ```typescript
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { MyMCPServer } from "./server.js";
 import { DbHandlers } from "./dbHandlers.js";
 
 async function main() {
-  // 1. Create registered server instance
-  const server = new MyMCPServer(
-    { name: "my-database-mcp", version: "2.0.1" },
-    { capabilities: {} }
-  );
+  // 1. Create registered McpServer instance
+  const server = new MyMCPServer({ name: "my-database-mcp", version: "2.0.2" });
 
   // 2. Instantiate handlers (binds decorators dynamically BEFORE connecting)
   new DbHandlers();
@@ -347,6 +350,39 @@ async function main() {
 }
 
 main().catch(console.error);
+```
+
+### Streamable HTTP Transport Alternative (Recommended for Remote Servers)
+For remote servers and web APIs, use `StreamableHTTPServerTransport` with Express. In stateless mode, each incoming request is handled independently with its own transport lifecycle:
+
+```typescript
+import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
+import express from "express";
+import { MyMCPServer } from "./server.js";
+import { DbHandlers } from "./dbHandlers.js";
+
+const app = express();
+app.use(express.json());
+
+// Stateless HTTP setup: independent transport per request, compatible with Express 4 and 5
+app.post("/mcp", async (req, res) => {
+  const server = new MyMCPServer({ name: "my-database-mcp", version: "2.0.2" });
+  new DbHandlers();
+
+  const transport = new StreamableHTTPServerTransport({
+    sessionIdGenerator: undefined
+  });
+
+  await server.connect(transport);
+  await transport.handleRequest(req, res, req.body);
+
+  res.on("close", () => {
+    transport.close();
+    server.close();
+  });
+});
+
+app.listen(3000, () => console.log("🚀 MCP Server running on Streamable HTTP port 3000"));
 ```
 
 ---
@@ -447,7 +483,7 @@ export class MyMCPClient extends Client {}
 ```typescript
 import { UseClient, CallTool, ListTools, ReadResource, NotificationHandler } from "@ananay-nag/mcp-decorators";
 
-@UseClient({ name: "my-mcp-client", version: "2.0.1" })
+@UseClient({ name: "my-mcp-client", version: "2.0.2" })
 export class ClientController {
   client: any; // Injected instance
 
@@ -481,7 +517,7 @@ import { ClientController } from "./service.js";
 
 async function runClient() {
   const client = new MyMCPClient(
-    { name: "my-mcp-client", version: "2.0.1" },
+    { name: "my-mcp-client", version: "2.0.2" },
     { capabilities: {} }
   );
 
@@ -561,7 +597,7 @@ Fetch a registered server instance programmatically.
 ```typescript
 import { getServer } from "@ananay-nag/mcp-decorators";
 
-const server = getServer({ name: "my-database-mcp", version: "2.0.1" });
+const server = getServer({ name: "my-database-mcp", version: "2.0.2" });
 ```
 
 #### 6. `getClient(options)`
@@ -569,7 +605,7 @@ Fetch a registered client instance programmatically.
 ```typescript
 import { getClient } from "@ananay-nag/mcp-decorators";
 
-const client = getClient({ name: "my-mcp-client", version: "2.0.1" });
+const client = getClient({ name: "my-mcp-client", version: "2.0.2" });
 ```
 
 ---
@@ -596,21 +632,21 @@ npm run test:coverage
 <!-- START_COVERAGE -->
 | File | % Stmts | % Branch | % Funcs | % Lines |
 | :--- | :--- | :--- | :--- | :--- |
-| All files | 70.12 | 52.12 | 61.36 | 70.47 |
+| All files | 71.39 | 52.47 | 64.44 | 72.1 |
 | client/decorators | 77.08 | 52.17 | 68 | 77.65 |
 | client.decorator.ts | 74.71 | 52.38 | 61.9 | 75.29 |
 | notification.decorator.ts | 100 | 50 | 100 | 100 |
 | requestHandler.decorator.ts | 100 | 50 | 100 | 100 |
 | client/utils | 70 | 62.5 | 75 | 68.42 |
 | clientRegistry.ts | 70 | 62.5 | 75 | 68.42 |
-| server/decorators | 72.8 | 53.15 | 62.5 | 73.25 |
+| server/decorators | 74.63 | 53.38 | 68 | 75.66 |
 | action.decorator.ts | 100 | 100 | 100 | 100 |
 | completion.decorator.ts | 100 | 50 | 100 | 100 |
 | notification.decorator.ts | 100 | 50 | 100 | 100 |
 | prompt.decorator.ts | 100 | 50 | 100 | 100 |
 | requestHandler.decorator.ts | 100 | 100 | 100 | 100 |
 | resource.decorator.ts | 100 | 50 | 100 | 100 |
-| server.decorator.ts | 66.99 | 52.29 | 35.71 | 67.33 |
+| server.decorator.ts | 69.73 | 52.76 | 46.66 | 70.77 |
 | subscribe.decorator.ts | 100 | 100 | 100 | 100 |
 | tool.decorator.ts | 100 | 50 | 100 | 100 |
 | server/utils | 42.85 | 40 | 36.36 | 42.55 |

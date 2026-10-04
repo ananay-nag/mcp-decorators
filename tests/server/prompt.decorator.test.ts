@@ -82,4 +82,62 @@ describe("Prompt Decorator", () => {
       expect.any(Function)
     );
   });
+
+  it("should translate argsSchema to arguments when listing prompts on a legacy server", async () => {
+    let listPromptsHandler: Function | undefined;
+    const mockServer = {
+      connect: jest.fn(),
+      setRequestHandler: jest.fn().mockImplementation((schema: any, handler: any) => {
+        if (schema?.shape?.method?.value === "prompts/list") {
+          listPromptsHandler = handler;
+        }
+      }),
+      setNotificationHandler: jest.fn(),
+      registerCapabilities: jest.fn(),
+    };
+
+    @RegisterServer()
+    class ServerV1Schema {
+      constructor(serverInfo?: any) {}
+      connect = jest.fn();
+      setRequestHandler = mockServer.setRequestHandler;
+      setNotificationHandler = mockServer.setNotificationHandler;
+      registerCapabilities = mockServer.registerCapabilities;
+    }
+
+    const serverInfo = { name: "prompt-v1-schema-server", version: "2.0.2" };
+    new ServerV1Schema(serverInfo);
+
+    const { z } = await import("zod");
+
+    @UseServer(serverInfo)
+    class SchemaPromptHandler {
+      @Prompt({
+        name: "test_schema_prompt",
+        description: "A prompt with argsSchema",
+        argsSchema: {
+          username: z.string().describe("The username"),
+          count: z.number().optional().describe("Number of items")
+        }
+      })
+      myPrompt(args: any) {
+        return "schema prompt response";
+      }
+    }
+
+    new SchemaPromptHandler();
+    expect(listPromptsHandler).toBeDefined();
+    const result = await listPromptsHandler!();
+    expect(result.prompts).toEqual([
+      {
+        name: "test_schema_prompt",
+        description: "A prompt with argsSchema",
+        arguments: [
+          { name: "username", description: "The username", required: true },
+          { name: "count", description: "Number of items", required: false }
+        ]
+      }
+    ]);
+  });
 });
+

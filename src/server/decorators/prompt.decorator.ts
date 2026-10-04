@@ -8,6 +8,7 @@ export interface PromptOptions {
   name: string;
   description?: string;
   arguments?: PromptArgument[];
+  argsSchema?: Record<string, any>;
 }
 
 export const PROMPT_META = Symbol("mcpPrompts");

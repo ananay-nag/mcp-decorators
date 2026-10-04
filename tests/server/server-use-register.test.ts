@@ -56,4 +56,54 @@ describe("Server Use and Register Decorators", () => {
       new TestHandler();
     }).toThrow('Server with name "non-existent-server" not found.');
   });
+
+  it("should register McpServer without deprecation warning", () => {
+    const warnSpy = jest.spyOn(console, "warn").mockImplementation(() => {});
+
+    @RegisterServer()
+    class ModernMcpServer {
+      constructor(serverInfo?: any) {}
+      connect = jest.fn();
+      registerTool = jest.fn();
+      registerPrompt = jest.fn();
+      registerResource = jest.fn();
+      server = {
+        setRequestHandler: jest.fn(),
+        setNotificationHandler: jest.fn(),
+      };
+    }
+
+    const serverInfo = { name: "mcp-server-clean", version: "2.0.2" };
+    new ModernMcpServer(serverInfo);
+
+    @UseServer(serverInfo)
+    class ModernHandler {
+      server: any;
+    }
+    new ModernHandler();
+
+    expect(warnSpy).not.toHaveBeenCalled();
+    warnSpy.mockRestore();
+  });
+
+  it("should warn when registering a legacy Server", () => {
+    const warnSpy = jest.spyOn(console, "warn").mockImplementation(() => {});
+
+    @RegisterServer()
+    class LegacyServer {
+      constructor(serverInfo?: any) {}
+      connect = jest.fn();
+      setRequestHandler = jest.fn();
+      setNotificationHandler = jest.fn();
+    }
+
+    const serverInfo = { name: "legacy-server", version: "2.0.2" };
+    new LegacyServer(serverInfo);
+
+    expect(warnSpy).toHaveBeenCalledWith(
+      expect.stringContaining("[mcp-decorators] [DEPRECATION WARNING]")
+    );
+    warnSpy.mockRestore();
+  });
 });
+
