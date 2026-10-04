@@ -20,7 +20,7 @@ describe("Client Use and Register Decorators", () => {
   it("should inject client and wrap calls with request decorators", async () => {
     const mockClientInstance = {
       connect: jest.fn(),
-      request: jest.fn().mockResolvedValue({ success: true } as any),
+      request: (jest.fn() as any).mockResolvedValue({ success: true }),
     };
 
     @RegisterClient()

@@ -74,16 +74,23 @@ Ensure that you have enabled decorator support in your `tsconfig.json`:
 ### Class Decorators
 
 #### `@RegisterServer()`
-* **Target:** Class extending `Server` (from `@modelcontextprotocol/sdk/server/index.js`)
+* **Target:** Class extending `McpServer` (from `@modelcontextprotocol/sdk/server/mcp.js`)
 * **Description:** Automatically registers the server instance in the global registry under its specified name and version upon construction.
+
+> [!WARNING]
+> **Deprecation Notice for `Server`**:
+> In `@modelcontextprotocol/sdk` v1.32.0+, the low-level `Server` class from `@modelcontextprotocol/sdk/server/index.js` is deprecated in favor of `McpServer` (`@modelcontextprotocol/sdk/server/mcp.js`).
+> `@ananay-nag/mcp-decorators` now provides native first-class integration with `McpServer`.
+> Legacy `Server` continues to work with a runtime deprecation warning in v2.1.x, but support for `Server` will be **completely removed in the next major version**. Please migrate your servers to `McpServer`.
+
 ```typescript
-import { Server, ServerOptions } from "@modelcontextprotocol/sdk/server/index.js";
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { RegisterServer } from "@ananay-nag/mcp-decorators";
 import { Implementation } from "@modelcontextprotocol/sdk/types.js";
 
 @RegisterServer()
-export class MyMCPServer extends Server {
-  constructor(serverInfo: Implementation, options?: ServerOptions) {
+export class MyMCPServer extends McpServer {
+  constructor(serverInfo: Implementation, options?: any) {
     super(serverInfo, options);
   }
 }
@@ -96,7 +103,7 @@ export class MyMCPServer extends Server {
 ```typescript
 import { UseServer } from "@ananay-nag/mcp-decorators";
 
-@UseServer({ name: "my-mcp-server", version: "2.0.1" })
+@UseServer({ name: "my-mcp-server", version: "2.0.2" })
 export class DbHandlers {
   server: any; // Automatically injected server instance
 }
@@ -356,7 +363,7 @@ Ideal for local integrations (CLIs, local IDE plugins). It communicates directly
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { MyMCPServer } from "./server.js";
 
-const server = new MyMCPServer({ name: "stdio-server", version: "2.0.1" });
+const server = new MyMCPServer({ name: "stdio-server", version: "2.0.2" });
 await server.connect(new StdioServerTransport());
 ```
 
@@ -370,7 +377,7 @@ import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
 import { MyMCPServer } from "./server.js";
 
 const app = express();
-const server = new MyMCPServer({ name: "express-server", version: "2.0.1" });
+const server = new MyMCPServer({ name: "express-server", version: "2.0.2" });
 
 let transport: SSEServerTransport | null = null;
 
@@ -397,7 +404,7 @@ import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
 import { MyMCPServer } from "./server.js";
 
 const app = new Hono();
-const server = new MyMCPServer({ name: "hono-server", version: "2.0.1" });
+const server = new MyMCPServer({ name: "hono-server", version: "2.0.2" });
 let transport: SSEServerTransport | null = null;
 
 app.get("/sse", async (c) => {
@@ -422,7 +429,7 @@ import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
 import { MyMCPServer } from "./server.js";
 
 const fastify = Fastify();
-const server = new MyMCPServer({ name: "fastify-server", version: "2.0.1" });
+const server = new MyMCPServer({ name: "fastify-server", version: "2.0.2" });
 let transport: SSEServerTransport | null = null;
 
 fastify.get("/sse", async (request, reply) => {
@@ -456,7 +463,7 @@ import { createMcpHandler } from "@modelcontextprotocol/server";
 import { MyMcpServer } from "./server.js";
 
 const app = createMcpExpressApp();
-const mcpHandler = createMcpHandler(() => new MyMcpServer({ name: "express-server", version: "2.0.1" }));
+const mcpHandler = createMcpHandler(() => new MyMcpServer({ name: "express-server", version: "2.0.2" }));
 
 app.all("/mcp/*", async (req, res) => {
   const webReq = new Request(`${req.protocol}://${req.get("host")}${req.originalUrl}`, {
@@ -481,7 +488,7 @@ import { createMcpHandler } from "@modelcontextprotocol/server";
 import { MyMcpServer } from "./server.js";
 
 const app = new Hono();
-const mcpHandler = createMcpHandler(() => new MyMcpServer({ name: "hono-server", version: "2.0.1" }));
+const mcpHandler = createMcpHandler(() => new MyMcpServer({ name: "hono-server", version: "2.0.2" }));
 
 app.all("/mcp/*", async (c) => {
   return mcpHandler.fetch(c.req.raw);
@@ -498,7 +505,7 @@ import { createMcpHandler } from "@modelcontextprotocol/server";
 import { MyMcpServer } from "./server.js";
 
 const fastify = Fastify();
-const mcpHandler = createMcpHandler(() => new MyMcpServer({ name: "fastify-server", version: "2.0.1" }));
+const mcpHandler = createMcpHandler(() => new MyMcpServer({ name: "fastify-server", version: "2.0.2" }));
 
 fastify.all("/mcp/*", async (request, reply) => {
   const url = `${request.protocol}://${request.hostname}${request.url}`;
@@ -523,7 +530,7 @@ Deploy directly to edge runtimes natively:
 import { createMcpHandler } from "@modelcontextprotocol/server";
 import { MyMcpServer } from "./server.js";
 
-const mcpHandler = createMcpHandler(() => new MyMcpServer({ name: "edge-server", version: "2.0.1" }));
+const mcpHandler = createMcpHandler(() => new MyMcpServer({ name: "edge-server", version: "2.0.2" }));
 
 export default {
   async fetch(request: Request): Promise<Response> {
@@ -705,7 +712,7 @@ export class CalcHandlers {
 }
 
 async function start() {
-  const server = new CalculatorServer({ name: "calc-server", version: "2.0.1" }, { capabilities: {} });
+  const server = new CalculatorServer({ name: "calc-server", version: "2.0.2" }, { capabilities: {} });
   new CalcHandlers();
   await server.connect(new StdioServerTransport());
 }
@@ -733,7 +740,7 @@ export class AppController {
 }
 
 async function startClient() {
-  const client = new AppClient({ name: "calc-client", version: "2.0.1" }, { capabilities: {} });
+  const client = new AppClient({ name: "calc-client", version: "2.0.2" }, { capabilities: {} });
   const transport = new StdioClientTransport({ command: "node", args: ["server.js"] });
   await client.connect(transport);
 

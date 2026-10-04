@@ -1,8 +1,8 @@
 /**
  * @description
- * This interface defines the options for registering a server.
+ * Base options for server identification.
  * The name is a required field, while the version is optional.
- * additional properties can be added as needed.
+ * Additional properties can be added as needed.
  */
 interface BaseServer {
   name: string;
@@ -12,23 +12,31 @@ interface BaseServer {
 
 /**
  * @description
- * This interface defines the options for registering a server.
- * The name is a required field, while the version is optional.
+ * Options for registering an MCP server instance with `@RegisterServer()`.
+ *
+ * @note
+ * In `@modelcontextprotocol/sdk` >= 1.32.0, the low-level `Server` class is deprecated.
+ * You should use `McpServer` from `@modelcontextprotocol/sdk/server/mcp.js`.
+ * Support for legacy `Server` will be completely removed in the next major version.
  */
 export interface RegisterServerOptions extends BaseServer {}
 
 /**
  * @description
- * This interface defines the options for using a server.
- * The name is a required field, while the version is optional.
+ * Options for binding decorator handlers to a server instance with `@UseServer()`.
+ *
+ * @note
+ * Targets servers registered via `@RegisterServer()`. Works with both `McpServer`
+ * (recommended) and legacy `Server` (deprecated).
  */
 export interface UseServerOptions extends BaseServer {}
 
 /**
  * @description
- * This interface defines the metadata for a server.
- * It includes the server name is required, version is optional, and the server instance itself.
+ * Metadata stored for a registered server instance.
+ * Stores server name, version, and the server instance (`McpServer` or legacy `Server`).
  */
 export interface ServerMetadata extends BaseServer {
   server: any;
 }
+

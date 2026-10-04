@@ -1,5 +1,5 @@
 import { getServer, registerServer, getOrCreateServerRegistration, matchUriTemplate } from "../utils/serverRegistry.js";
-import { Server } from "@modelcontextprotocol/sdk/server/index.js";
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { UseServerOptions } from "../types/index.js";
 import { z } from "zod";
 import { zodToJsonSchema } from "zod-to-json-schema";
@@ -26,6 +26,7 @@ import { COMPLETION_META } from "./completion.decorator.js";
 /**
  * @description
  * This decorator is used to register a server instance.
+ * Supports modern McpServer (recommended) as well as legacy Server (deprecated).
  * @returns {ClassDecorator} A class decorator that registers the server instance.
  */
 export function RegisterServer(): ClassDecorator {
@@ -37,9 +38,21 @@ export function RegisterServer(): ClassDecorator {
       const instance = new originalConstructor(...args);
       console.log(`[Server] Registering server "${JSON.stringify(serverInfo)}"`);
 
-      // Relaxed check to support both SDK v1 Server and SDK v2 McpServer
+      // Support both modern McpServer and legacy Server
       if (instance && (typeof (instance as any).connect === "function")) {
         registerServer(serverInfo, instance);
+      }
+
+      // Check if instance is legacy Server (not McpServer)
+      const isMcpServer =
+        typeof (instance as any).registerTool === "function" ||
+        typeof (instance as any).tool === "function" ||
+        Boolean((instance as any).server);
+
+      if (!isMcpServer) {
+        console.warn(
+          `[mcp-decorators] [DEPRECATION WARNING] 'Server' is deprecated in @modelcontextprotocol/sdk. Please migrate to 'McpServer' from '@modelcontextprotocol/sdk/server/mcp.js'. Support for legacy 'Server' will be removed in the next major version of @ananay-nag/mcp-decorators.`
+        );
       }
 
       return instance;
@@ -162,9 +175,18 @@ export function UseServer(options: UseServerOptions): ClassDecorator {
         throw new Error(`Server with name "${options.name}" not found.`);
       }
 
-      const isMcpServer = typeof (server as any).registerTool === "function" || typeof (server as any).tool === "function";
+      const isMcpServer =
+        typeof (server as any).registerTool === "function" ||
+        typeof (server as any).tool === "function" ||
+        Boolean((server as any).server);
       const underlyingServer = server.server || server;
       instance.server = server;
+
+      if (!isMcpServer) {
+        console.warn(
+          `[mcp-decorators] [DEPRECATION WARNING] Server "${options.name}" is using legacy 'Server' from @modelcontextprotocol/sdk. Please migrate to 'McpServer' from '@modelcontextprotocol/sdk/server/mcp.js'. Support for legacy 'Server' will be removed in the next major version of @ananay-nag/mcp-decorators.`
+        );
+      }
 
       // 1. Register low-level Request and Notification handlers
       registerRequestHandlers(target, instance, underlyingServer);
@@ -196,10 +218,16 @@ export function UseServer(options: UseServerOptions): ClassDecorator {
         const handlerFn = instance[methodName].bind(instance);
         if (isMcpServer) {
           const regPrompt = (server as any).registerPrompt || (server as any).prompt;
-          regPrompt.call(server, promptOpts.name, {
+          const promptConfig: any = {
             description: promptOpts.description,
-            arguments: promptOpts.arguments
-          }, (args: any, extra: any) => handlerFn(args, extra?.mcpReq, extra));
+          };
+          if (promptOpts.arguments) {
+            promptConfig.arguments = promptOpts.arguments;
+          }
+          if (promptOpts.argsSchema) {
+            promptConfig.argsSchema = promptOpts.argsSchema;
+          }
+          regPrompt.call(server, promptOpts.name, promptConfig, (args: any, extra: any) => handlerFn(args, extra?.mcpReq, extra));
           console.log(`[Server] Registered Prompt Decorator "${promptOpts.name}" natively on McpServer`);
         } else {
           reg.prompts.set(promptOpts.name, { options: promptOpts, handler: handlerFn });
@@ -216,7 +244,7 @@ export function UseServer(options: UseServerOptions): ClassDecorator {
           regRes.call(server, resOpts.name, resOpts.uri, {
             description: resOpts.description,
             mimeType: resOpts.mimeType
-          }, (uri: any, extra: any) => handlerFn(uri.href || String(uri), extra?.mcpReq, extra));
+          }, (uri: any, extra: any) => handlerFn(uri?.href || String(uri), extra?.mcpReq, extra));
           console.log(`[Server] Registered Resource Decorator "${resOpts.uri}" natively on McpServer`);
         } else {
           reg.resources.set(resOpts.uri, { options: resOpts, handler: handlerFn });
@@ -234,7 +262,7 @@ export function UseServer(options: UseServerOptions): ClassDecorator {
             description: tempOpts.description,
             mimeType: tempOpts.mimeType
           }, (uri: any, extra: any) => {
-            const uriStr = uri.href || String(uri);
+            const uriStr = uri?.href || String(uri);
             const params = matchUriTemplate(tempOpts.uriTemplate, uriStr) || {};
             return handlerFn(params, uriStr, extra?.mcpReq, extra);
           });
